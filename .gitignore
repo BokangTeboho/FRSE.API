@@ -57,3 +57,5 @@ TestResult.xml
 nunit-*.xml
 /src/FraudEngine/.vs/FraudEngine.slnx
 /.vs
+/src/FraudEngine/.vs/ProjectEvaluation
+/src/FraudEngine/FE.API/FE.API.csproj.user

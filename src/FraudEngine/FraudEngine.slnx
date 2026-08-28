@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="FE.API/FE.API.csproj" Id="201e8418-b30b-468c-8e73-e74dd4ac8a14" />
   <Project Path="FE.Core/FE.Core.csproj" />
+  <Project Path="FE.Infrastructure/FE.Infrastructure.csproj" Id="9ffbe481-9569-445e-9596-2b7a5e1f8217" />
 </Solution>
