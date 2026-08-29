@@ -59,3 +59,4 @@ nunit-*.xml
 /.vs
 /src/FraudEngine/.vs/ProjectEvaluation
 /src/FraudEngine/FE.API/FE.API.csproj.user
+/src/FraudEngine/.vs/FraudEngine/CopilotIndices/18.8.1106.51376
