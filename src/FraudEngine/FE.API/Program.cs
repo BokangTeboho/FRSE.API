@@ -7,6 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.Configure<ThresholdRuleOptions>(builder.Configuration.GetSection("FraudRules:Threshold"));
 builder.Services.Configure<VelocityRuleOptions>(builder.Configuration.GetSection("FraudRules:Velocity"));
+builder.Services.Configure<StructuringRuleOptions>(builder.Configuration.GetSection("FraudRules:Structuring"));
+builder.Services.Configure<BehavioralDeviationRuleOptions>(builder.Configuration.GetSection("FraudRules:BehavioralDeviation"));
+builder.Services.Configure<RoundNumberRuleOptions>(builder.Configuration.GetSection("FraudRules:RoundNumber"));
+builder.Services.Configure<GeographicRuleOptions>(builder.Configuration.GetSection("FraudRules:GeographicRule"));
 
 var app = builder.Build();
 

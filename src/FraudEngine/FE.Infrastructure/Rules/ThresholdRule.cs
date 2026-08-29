@@ -15,6 +15,14 @@ namespace FE.Infrastructure.Rules
     {
         public string Name => "Threshold";
 
+        public IReadOnlySet<PaymentChannel> ApplicableChannels =>
+            new HashSet<PaymentChannel> 
+            { 
+                PaymentChannel.CardPresent, 
+                PaymentChannel.Online, 
+                PaymentChannel.Transfer 
+            };
+
         public FraudRuleResult Evaluate(Transaction transaction, ScanSnapshot snapshot)
         {
             var optionsValue = options.Value;

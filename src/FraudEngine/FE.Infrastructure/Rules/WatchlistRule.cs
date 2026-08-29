@@ -1,5 +1,6 @@
 ﻿using FE.Core.Common;
 using FE.Core.Entities;
+using FE.Core.Enums;
 using FE.Core.Interfaces;
 
 namespace FE.Infrastructure.Rules
@@ -7,6 +8,14 @@ namespace FE.Infrastructure.Rules
     public class WatchlistRule : IFraudRule
     {
         public string Name => "Watchlist";
+
+        public IReadOnlySet<PaymentChannel> ApplicableChannels =>
+            new HashSet<PaymentChannel>
+            {
+                PaymentChannel.CardPresent,
+                PaymentChannel.Online,
+                PaymentChannel.Transfer
+            };
 
         public FraudRuleResult Evaluate(Transaction transaction, ScanSnapshot snapshot)
         {
