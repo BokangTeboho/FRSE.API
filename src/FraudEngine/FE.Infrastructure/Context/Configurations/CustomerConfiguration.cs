@@ -9,7 +9,11 @@ namespace FE.Infrastructure.Context.Configurations
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
             builder.HasKey(c => c.Id);
+
+            builder.Property(c => c.AccountNumber).HasMaxLength(50);
             builder.Property(c => c.AverageTransactionAmount).HasPrecision(18, 2);
+
+            builder.HasIndex(c => c.AccountNumber).IsUnique();
         }
     }
 }

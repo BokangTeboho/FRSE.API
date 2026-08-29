@@ -2,10 +2,11 @@
 {
     public class Customer
     {
-        public Guid Id { get; set; }
-        public required string Name { get; set; }
-        public decimal AverageTransactionAmount { get; set; }
-        public IList<string> KnownCountries { get; set; } = [];
-        public DateTimeOffset AccountCreatedAt { get; set; }
+        public Guid Id { get; init; }
+        public required string AccountNumber { get; init; }
+        public required string Name { get; init; }
+        public decimal AverageTransactionAmount { get; init; }
+        public List<string> KnownCountries { get; init; } = [];
+        public DateTimeOffset AccountCreatedAt { get; init; }
     }
 }

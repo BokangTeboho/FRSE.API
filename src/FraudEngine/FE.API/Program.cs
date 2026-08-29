@@ -1,29 +1,44 @@
-using FE.Infrastructure.Context;
-using FE.Infrastructure.Rules;
-using Microsoft.EntityFrameworkCore;
+using FastEndpoints;
+using FastEndpoints.Swagger;
+using FE.API.ConfigurationExtensions;
+using FE.Core.Features.Transaction.ScanTransaction;
+using FE.Core.Interfaces;
+using FE.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.Configure<ThresholdRuleOptions>(builder.Configuration.GetSection("FraudRules:Threshold"));
-builder.Services.Configure<VelocityRuleOptions>(builder.Configuration.GetSection("FraudRules:Velocity"));
-builder.Services.Configure<StructuringRuleOptions>(builder.Configuration.GetSection("FraudRules:Structuring"));
-builder.Services.Configure<BehavioralDeviationRuleOptions>(builder.Configuration.GetSection("FraudRules:BehavioralDeviation"));
-builder.Services.Configure<RoundNumberRuleOptions>(builder.Configuration.GetSection("FraudRules:RoundNumber"));
-builder.Services.Configure<GeographicRuleOptions>(builder.Configuration.GetSection("FraudRules:GeographicRule"));
-builder.Services.AddDbContext<FraudEngineDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("FraudEngine")));
+builder.Services.SwaggerDocument();
+builder.Services.AddFastEndpoints(o =>
+{
+    o.Assemblies =
+    [
+        typeof(ScanTransactionCommandHandler).Assembly
+    ];
+});
+
+builder.Services.AddScoped<IWatchlistService, WatchlistService>();
+builder.Services.ConfigureRulesOptions(builder.Configuration);
+builder.Services.RegisterRepositories();
+builder.Services.RegisterRules();
+builder.Services.AddDbContext(builder.Configuration);
+
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = builder.Configuration
+        .GetValue<int>("FraudRules:WatchlistCache:SizeLimit");
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
+//app.UseAuthentication();
+//app.UseAuthorization();
+app.UseFastEndpoints();
+app.UseSwaggerGen();
 app.Run();

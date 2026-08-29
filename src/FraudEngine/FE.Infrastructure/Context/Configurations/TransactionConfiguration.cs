@@ -12,11 +12,14 @@ namespace FE.Infrastructure.Context.Configurations
 
             builder.Property(t => t.Amount).HasPrecision(18, 2);
             builder.Property(t => t.Currency).HasMaxLength(3);
-            builder.Property(t => t.Country).HasMaxLength(3);
+            builder.Property(t => t.Country).HasMaxLength(3); //questionable
+            builder.Property(t => t.AccountNumber).HasMaxLength(50);
+            builder.Property(t => t.MerchantId).HasMaxLength(50);
+            builder.Property(t => t.BeneficiaryAccountNumber).HasMaxLength(50);
             builder.Property(t => t.PaymentTiming).HasConversion<string>();
             builder.Property(t => t.PaymentChannel).HasConversion<string>();
 
-            builder.HasIndex(t => new { t.CustomerId, t.CreatedAt });
+            builder.HasIndex(t => new { t.AccountNumber, t.CreatedAt });
         }
     }
 }
