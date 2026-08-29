@@ -1,4 +1,6 @@
+using FE.Infrastructure.Context;
 using FE.Infrastructure.Rules;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,8 @@ builder.Services.Configure<StructuringRuleOptions>(builder.Configuration.GetSect
 builder.Services.Configure<BehavioralDeviationRuleOptions>(builder.Configuration.GetSection("FraudRules:BehavioralDeviation"));
 builder.Services.Configure<RoundNumberRuleOptions>(builder.Configuration.GetSection("FraudRules:RoundNumber"));
 builder.Services.Configure<GeographicRuleOptions>(builder.Configuration.GetSection("FraudRules:GeographicRule"));
+builder.Services.AddDbContext<FraudEngineDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("FraudEngine")));
 
 var app = builder.Build();
 

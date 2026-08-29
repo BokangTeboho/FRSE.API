@@ -2,7 +2,7 @@
 
 namespace FE.Infrastructure.Services
 {
-    internal class WatchlistService : IWatchlistService
-    {
-    }
+    //internal class WatchlistService : IWatchlistService
+    //{
+    //}
 }
