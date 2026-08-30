@@ -1,13 +1,18 @@
 ﻿using FE.Core.Interfaces;
 using FE.Infrastructure.Context;
+using FE.Infrastructure.Resilience;
+using Polly;
+using Polly.Registry;
 
 namespace FE.Infrastructure.Repositories
 {
-    public class UnitOfWork(FraudEngineDbContext db) : IUnitOfWork
+    public class UnitOfWork(FraudEngineDbContext db, ResiliencePipelineProvider<string> pipelineProvider) : IUnitOfWork
     {
-        public Task SaveChangesAsync(CancellationToken ct)
+        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline(ResilienceExtensions.DatabasePipelineName);
+
+        public async Task SaveChangesAsync(CancellationToken ct)
         {
-            return db.SaveChangesAsync(ct);
+            await _pipeline.ExecuteAsync(async token => await db.SaveChangesAsync(token), ct);
         }
     }
 }

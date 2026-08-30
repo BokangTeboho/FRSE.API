@@ -4,6 +4,7 @@ using FE.API.ConfigurationExtensions;
 using FE.API.Middleware;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
+using FE.Infrastructure.Resilience;
 using FE.Infrastructure.Services;
 using Serilog;
 
@@ -33,6 +34,7 @@ builder.Services.ConfigureRulesOptions(builder.Configuration);
 builder.Services.RegisterRepositories();
 builder.Services.RegisterRules();
 builder.Services.AddDbContext(builder.Configuration);
+builder.Services.AddDatabaseResilience();
 
 builder.Services.AddMemoryCache(options =>
 {
