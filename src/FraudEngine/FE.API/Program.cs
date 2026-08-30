@@ -4,17 +4,25 @@ using FE.API.ConfigurationExtensions;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
 using FE.Infrastructure.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .CreateLogger();
+
+builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 builder.Services.SwaggerDocument();
-builder.Services.AddFastEndpoints(o =>
+builder.Services.AddFastEndpoints(options =>
 {
-    o.Assemblies =
+    options.Assemblies =
     [
         typeof(ScanTransactionCommandHandler).Assembly
     ];
+    options.IncludeAbstractValidators = true;
 });
 
 builder.Services.AddScoped<IWatchlistService, WatchlistService>();
@@ -30,6 +38,7 @@ builder.Services.AddMemoryCache(options =>
 });
 
 var app = builder.Build();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
@@ -41,4 +50,5 @@ app.UseHttpsRedirection();
 //app.UseAuthorization();
 app.UseFastEndpoints();
 app.UseSwaggerGen();
+app.MapHealthChecks("/health");
 app.Run();
