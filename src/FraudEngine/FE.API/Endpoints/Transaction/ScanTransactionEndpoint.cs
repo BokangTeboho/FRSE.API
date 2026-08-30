@@ -21,14 +21,14 @@ namespace FE.API.Endpoints.Transaction
         public override async Task HandleAsync(ScanTransactionCommand req, CancellationToken ct)
         {
             _logger.LogInformation(
-                "Scanning transaction {ReferenceId} for account {AccountNumber}, amount {Amount} {Currency}",
-                req.ReferenceId, req.AccountNumber, req.Amount, req.Currency);
+                "Scanning transaction with ReferenceId={ReferenceId}",
+                req.ReferenceId);
 
             var result = await req.ExecuteAsync(ct);
 
             _logger.LogInformation(
-                "Transaction scan completed for {ReferenceId}, {RuleCount} rule(s) triggered",
-                req.ReferenceId, result.TriggeredRules.Count);
+                "Transaction scan completed for {ReferenceId}",
+                req.ReferenceId);
 
             await Send.OkAsync(result, ct);
         }

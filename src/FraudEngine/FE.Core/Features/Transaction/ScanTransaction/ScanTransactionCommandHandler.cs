@@ -86,8 +86,8 @@ namespace FE.Core.Features.Transaction.ScanTransaction
             foreach (var result in triggeredRules)
             {
                 logger.LogInformation(
-                    "Fraud alert triggered: Rule={RuleName}, Severity={Severity}, TransactionId={TransactionId}, Account={AccountNumber}, Amount={Amount} {Currency}, Description={Description}",
-                    result.RuleName, result.Severity, transaction.Id, command.AccountNumber, command.Amount, command.Currency, result.Description);
+                    "Fraud alert triggered: Rule={RuleName}, Severity={Severity}, TransactionId={TransactionId}",
+                    result.RuleName, result.Severity.ToString(), transaction.Id);
 
                 await fraudAlertRepository.Add(new FraudAlert
                 {

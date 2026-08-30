@@ -20,10 +20,6 @@ namespace FE.API.Endpoints.Alerts
 
         public override async Task HandleAsync(SearchAlertsCommand req, CancellationToken ct)
         {
-            _logger.LogInformation(
-                "Searching fraud alerts, page {Page}, pageSize {PageSize}",
-                req.Page, req.PageSize);
-
             var result = await req.ExecuteAsync(ct);
 
             _logger.LogInformation(
