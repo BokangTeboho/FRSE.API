@@ -3,6 +3,7 @@ using FE.Core.Common;
 using FE.Core.Entities;
 using FE.Core.Enums;
 using FE.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace FE.Core.Features.Transaction.ScanTransaction
 {
@@ -30,7 +31,8 @@ namespace FE.Core.Features.Transaction.ScanTransaction
         IFraudAlertRepository fraudAlertRepository,
         IWatchlistService watchlistService,
         IEnumerable<IFraudRule> rules,
-        IUnitOfWork unitOfWork) : ICommandHandler<ScanTransactionCommand, ScanTransactionResult>
+        IUnitOfWork unitOfWork,
+        ILogger<ScanTransactionCommandHandler> logger) : ICommandHandler<ScanTransactionCommand, ScanTransactionResult>
     {
         public async Task<ScanTransactionResult> ExecuteAsync(ScanTransactionCommand command, CancellationToken ct)
         {
@@ -83,6 +85,10 @@ namespace FE.Core.Features.Transaction.ScanTransaction
 
             foreach (var result in triggeredRules)
             {
+                logger.LogInformation(
+                    "Fraud alert triggered: Rule={RuleName}, Severity={Severity}, TransactionId={TransactionId}, Account={AccountNumber}, Amount={Amount} {Currency}, Description={Description}",
+                    result.RuleName, result.Severity, transaction.Id, command.AccountNumber, command.Amount, command.Currency, result.Description);
+
                 await fraudAlertRepository.Add(new FraudAlert
                 {
                     Id = Guid.NewGuid(),

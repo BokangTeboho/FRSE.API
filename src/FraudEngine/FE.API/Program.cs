@@ -10,10 +10,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog();
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
+builder.Host.UseSerilog();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
