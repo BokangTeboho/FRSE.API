@@ -1,6 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using FE.API.ConfigurationExtensions;
+using FE.API.Middleware;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
 using FE.Infrastructure.Services;
@@ -16,6 +17,8 @@ Log.Logger = new LoggerConfiguration()
 builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 builder.Services.SwaggerDocument();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddFastEndpoints(options =>
 {
     options.Assemblies =
@@ -39,6 +42,7 @@ builder.Services.AddMemoryCache(options =>
 
 var app = builder.Build();
 app.UseSerilogRequestLogging();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
