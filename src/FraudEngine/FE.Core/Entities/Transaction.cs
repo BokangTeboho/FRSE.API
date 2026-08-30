@@ -9,6 +9,7 @@ namespace FE.Core.Entities
         public decimal Amount { get; set; }
         public required string Currency { get; set; }
         public required string Country { get; set; }
+        public required string ReferenceId { get; init; }
         public PaymentChannel PaymentChannel { get; set; }
         public string? MerchantName { get; set; }
         public string? MerchantId { get; set; }

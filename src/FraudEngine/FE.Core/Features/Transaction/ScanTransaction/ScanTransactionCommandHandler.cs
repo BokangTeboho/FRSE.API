@@ -63,6 +63,7 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 AccountNumber = command.AccountNumber,
                 Amount = command.Amount,
                 Currency = command.Currency,
+                ReferenceId = command.ReferenceId,
                 Country = command.Country,
                 MerchantId = command.MerchantId,
                 MerchantName = command.MerchantName,

@@ -20,6 +20,7 @@ namespace FE.Infrastructure.Context.Configurations
             builder.Property(t => t.PaymentChannel).HasConversion<string>();
 
             builder.HasIndex(t => new { t.AccountNumber, t.CreatedAt });
+            builder.HasIndex(t => new { t.ReferenceId, t.AccountNumber }).IsUnique();
         }
     }
 }
