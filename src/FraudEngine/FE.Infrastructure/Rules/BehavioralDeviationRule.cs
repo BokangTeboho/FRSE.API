@@ -26,10 +26,10 @@ namespace FE.Infrastructure.Rules
         {
             var optionsValue = options.Value;
 
-            if (snapshot.Customer.AverageTransactionAmount <= 0)
+            if (snapshot.ChannelAverage.AverageAmount <= 0)
                 return FraudRuleResult.Clean();
 
-            var ratio = transaction.Amount / snapshot.Customer.AverageTransactionAmount;
+            var ratio = transaction.Amount / snapshot.ChannelAverage.AverageAmount;
 
             if (ratio < optionsValue.DeviationMultiplier)
                 return FraudRuleResult.Clean();
@@ -44,7 +44,7 @@ namespace FE.Infrastructure.Rules
             return FraudRuleResult.Triggered(
                 ruleName: Name,
                 severity: severity,
-                description: $"Amount {transaction.Amount:C} is {ratio:F1}x the customer's average of {snapshot.Customer.AverageTransactionAmount:C}"
+                description: $"Amount {transaction.Amount:C} is {ratio:F1}x the customer's average of {snapshot.ChannelAverage.AverageAmount:C}"
             );
         }
     }

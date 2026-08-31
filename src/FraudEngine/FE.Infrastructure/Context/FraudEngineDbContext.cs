@@ -9,6 +9,7 @@ namespace FE.Infrastructure.Context
         public DbSet<FraudAlert> FraudAlerts => Set<FraudAlert>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<WatchlistEntry> WatchlistEntries => Set<WatchlistEntry>();
+        public DbSet<CustomerChannelAverage> CustomerChannelAverages => Set<CustomerChannelAverage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

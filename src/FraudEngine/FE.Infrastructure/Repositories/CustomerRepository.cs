@@ -1,4 +1,5 @@
 ﻿using FE.Core.Entities;
+using FE.Core.Enums;
 using FE.Core.Interfaces;
 using FE.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,11 @@ namespace FE.Infrastructure.Repositories
             await db.Customers.AddAsync(customer, ct);
         }
 
+        public async Task Add(CustomerChannelAverage customerChannelAverage, CancellationToken ct)
+        {
+            await db.CustomerChannelAverages.AddAsync(customerChannelAverage, ct);
+        }
+
         public async Task<Customer?> GetByAccountNumber(string accountNumber, CancellationToken ct)
         {
             return await db.Customers
@@ -19,9 +25,21 @@ namespace FE.Infrastructure.Repositories
                 .FirstOrDefaultAsync(ct);
         }
 
-        public void UpdateCustomer(Customer customer, CancellationToken ct)
+        public void UpdateCustomer(Customer customer)
         {
             db.Customers.Update(customer);
-        } 
+        }
+
+        public void UpdateCustomerAverage(CustomerChannelAverage customerChannelAverage)
+        {
+            db.CustomerChannelAverages.Update(customerChannelAverage);
+        }
+
+        public Task<CustomerChannelAverage?> GetByCustomerAndChannel(Guid customerId, PaymentChannel channel, CancellationToken ct)
+        {
+            return db.CustomerChannelAverages
+                .Where(c => c.CustomerId == customerId && c.PaymentChannel == channel)
+                .FirstOrDefaultAsync(ct);
+        }
     }
 }

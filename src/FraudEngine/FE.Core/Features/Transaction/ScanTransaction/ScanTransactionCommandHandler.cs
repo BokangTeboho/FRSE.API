@@ -7,24 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace FE.Core.Features.Transaction.ScanTransaction
 {
-    public record ScanTransactionCommand : ICommand<ScanTransactionResult>
-    {
-        public required string ReferenceId { get; init; }
-        public required string AccountNumber { get; init; }
-        public required string CustomerName { get; init; }
-        public required decimal Amount { get; init; }
-        public required string Currency { get; init; }
-        public required string Country { get; init; }
-        public required PaymentChannel PaymentChannel { get; init; }
-        public required PaymentTiming PaymentTiming { get; init; }
-        public string? MerchantName { get; init; }
-        public string? MerchantId { get; init; }
-        public string? BeneficiaryAccountNumber { get; init; }
-        public string? Category { get; init; }
-    }
-
-    public record ScanTransactionResult(string ReferenceId, IList<FraudRuleResult> TriggeredRules);
-
     public class ScanTransactionCommandHandler(
         ICustomerRepository customerRepository,
         ITransactionRepository transactionRepository,
@@ -59,12 +41,15 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 ? await watchlistService.CheckBeneficiary(command.BeneficiaryAccountNumber, ct)
                 : null;
 
+            var channelAverage = await GetAndUpdateAverage(customer.Id, command.PaymentChannel, command.Amount, ct);
+
             var snapshot = new ScanSnapshot
             {
                 Customer = customer,
                 RecentTransactions = recentTransactions,
                 MerchantWatchlistEntry = merchantWatchlistEntry,
-                BeneficiaryWatchlistEntry = beneficiaryWatchlistEntry
+                BeneficiaryWatchlistEntry = beneficiaryWatchlistEntry,
+                ChannelAverage = channelAverage
             };
 
             var transaction = new Entities.Transaction
@@ -149,10 +134,8 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 if (!customer.KnownCountries.Contains(command.Country.ToUpperInvariant()))
                 {
                     customer.KnownCountries.Add(command.Country.ToUpperInvariant());
+                    customerRepository.UpdateCustomer(customer);
                 }
-
-                //customer.AverageTransactionAmount
-                customerRepository.UpdateCustomer(customer, ct);
 
                 return customer;
             }
@@ -162,7 +145,6 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 Id = Guid.NewGuid(),
                 AccountNumber = command.AccountNumber,
                 Name = command.CustomerName,
-                AverageTransactionAmount = 0, // update here
                 KnownCountries = [command.Country.ToUpperInvariant()],
                 AccountCreatedAt = DateTimeOffset.UtcNow
             };
@@ -170,6 +152,37 @@ namespace FE.Core.Features.Transaction.ScanTransaction
             await customerRepository.Add(customer, ct);
 
             return customer;
+        }
+
+        private async Task<CustomerChannelAverage> GetAndUpdateAverage(Guid customerId, PaymentChannel paymentChannel, decimal newAmount, CancellationToken ct)
+        {
+            var channelAverage = await customerRepository
+                .GetByCustomerAndChannel(customerId, paymentChannel, ct);
+
+            if (channelAverage is null)
+            {
+                channelAverage = new CustomerChannelAverage
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = customerId,
+                    PaymentChannel = paymentChannel,
+                    AverageAmount = newAmount,
+                    TransactionCount = 1
+                };
+                await customerRepository.Add(channelAverage, ct);
+
+                return channelAverage;
+            }
+
+            channelAverage.AverageAmount =
+                ((channelAverage.AverageAmount * channelAverage.TransactionCount) + newAmount)
+                    / (channelAverage.TransactionCount + 1);
+
+            channelAverage.TransactionCount++;
+
+            customerRepository.UpdateCustomerAverage(channelAverage);
+
+            return channelAverage;
         }
     }
 }

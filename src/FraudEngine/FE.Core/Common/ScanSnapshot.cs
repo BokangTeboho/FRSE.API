@@ -6,6 +6,7 @@ namespace FE.Core.Common
     {
         public required Customer Customer { get; init; }
         public IReadOnlyList<Transaction> RecentTransactions { get; init; } = [];
+        public CustomerChannelAverage ChannelAverage { get; init; } = new();
         public Transaction? LastTransaction => RecentTransactions.LastOrDefault();
         public WatchlistEntry? MerchantWatchlistEntry { get; init; }
         public WatchlistEntry? BeneficiaryWatchlistEntry { get; init; }
