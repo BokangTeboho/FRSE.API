@@ -59,6 +59,25 @@ namespace FE.Infrastructure.Services
             });
         }
 
+        public async Task<WatchlistEntry?> Deactivate(Guid id, CancellationToken ct)
+        {
+            var entry = await _db.WatchlistEntries
+                .FirstOrDefaultAsync(w => w.Id == id && w.IsActive, ct);
+
+            if (entry is null)
+                return null;
+
+            entry.IsActive = false;
+
+            var prefix = entry.EntityType == EntityType.Merchant
+                ? MerchantPrefix
+                : BeneficiaryPrefix;
+
+            _cache.Remove(prefix + entry.EntityIdentifier);
+
+            return entry;
+        }
+
         private async Task<WatchlistEntry?> Check(
             string cacheKey, EntityType entityType, string identifier, CancellationToken ct)
         {

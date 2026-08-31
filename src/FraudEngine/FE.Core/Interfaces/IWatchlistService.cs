@@ -8,5 +8,6 @@ namespace FE.Core.Interfaces
         Task<WatchlistEntry?> CheckMerchant(string merchantId, CancellationToken cancellationToken);
         Task<WatchlistEntry?> CheckBeneficiary(string BeneficiaryAccountNumber, CancellationToken cancellationToken);
         Task Add(WatchlistEntry entry, CancellationToken ct);
+        Task<WatchlistEntry?> Deactivate(Guid id, CancellationToken ct);
     }
 }
