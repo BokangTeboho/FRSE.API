@@ -11,7 +11,7 @@ namespace FE.Core.Entities
         public required string Reason { get; set; }
         public int AlertCount { get; set; }
         public bool IsManualEntry { get; set; }
-        public required string AddedByIdentifier { get; set; }
+        public required string ModifiedByIdentifier { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 

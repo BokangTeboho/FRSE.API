@@ -19,7 +19,7 @@ namespace FE.Core.Features.WatchList.AddWatchlistEntry
                 RiskLevel = command.RiskLevel,
                 Reason = command.Reason,
                 IsManualEntry = true,
-                AddedByIdentifier = "Test",
+                ModifiedByIdentifier = "Test",
                 CreatedAt = DateTimeOffset.UtcNow
             };
 
@@ -34,7 +34,7 @@ namespace FE.Core.Features.WatchList.AddWatchlistEntry
                 entry.Reason,
                 entry.AlertCount,
                 entry.IsManualEntry,
-                entry.AddedByIdentifier,
+                entry.ModifiedByIdentifier,
                 entry.IsActive,
                 entry.CreatedAt);
         }
