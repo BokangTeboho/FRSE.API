@@ -19,18 +19,39 @@ builder.Host.UseSerilog();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
+var keycloakAuthority = builder.Configuration["Keycloak:Authority"]!;
+var swaggerClientId = builder.Configuration["Keycloak:SwaggerClientId"]!;
+
 builder.Services.SwaggerDocument(o =>
 {
     o.DocumentSettings = s =>
     {
         s.Title = "Fraud Engine API";
         s.Version = "v1";
+        s.AddAuth("KeycloakOAuth", new()
+        {
+            Type = OpenApiSecuritySchemeType.OAuth2,
+            Description = "Login via Keycloak",
+            Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = new OpenApiOAuthFlow
+                {
+                    AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
+                    TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
+                    Scopes = new Dictionary<string, string>
+                    {
+                        { "openid", "OpenID" },
+                        { "profile", "Profile" }
+                    }
+                }
+            }
+        });
         s.AddAuth("Bearer", new()
         {
             Type = OpenApiSecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            Description = "Enter your Keycloak JWT token"
+            Description = "Paste a valid JWT token directly"
         });
     };
 });
@@ -72,6 +93,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseFastEndpoints(c => c.Serializer.Options.Converters.Add(new JsonStringEnumConverter()));
-app.UseSwaggerGen();
+app.UseSwaggerGen(uiConfig: s =>
+{
+    s.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
+    {
+        ClientId = swaggerClientId,
+        UsePkceWithAuthorizationCodeGrant = true
+    };
+});
 app.MapHealthChecks("/health");
 app.Run();
