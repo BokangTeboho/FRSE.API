@@ -16,7 +16,6 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Patch("/watchlist/{Id}/deactivate");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(DeactivateWatchlistEntryCommand req, CancellationToken ct)

@@ -15,7 +15,6 @@ namespace FE.API.Endpoints.Transaction
         public override void Configure()
         {
             Post("/transaction/scan");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(ScanTransactionCommand req, CancellationToken ct)

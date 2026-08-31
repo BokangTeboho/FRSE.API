@@ -24,7 +24,6 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Get("/watchlist/merchant/{Identifier}");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(GetWatchlistMerchantRequest req, CancellationToken ct)
