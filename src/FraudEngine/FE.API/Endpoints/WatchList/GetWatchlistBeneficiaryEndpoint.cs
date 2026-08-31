@@ -37,7 +37,6 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Get("/watchlist/beneficiary/{Identifier}");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(GetWatchlistBeneficiaryRequest req, CancellationToken ct)

@@ -15,7 +15,6 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Post("/watchlist/entry");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)

@@ -6,6 +6,7 @@ using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
 using FE.Infrastructure.Resilience;
 using FE.Infrastructure.Services;
+using NSwag;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,21 @@ builder.Host.UseSerilog();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
-builder.Services.SwaggerDocument();
+builder.Services.SwaggerDocument(o =>
+{
+    o.DocumentSettings = s =>
+    {
+        s.Title = "Fraud Engine API";
+        s.Version = "v1";
+        s.AddAuth("Bearer", new()
+        {
+            Type = OpenApiSecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Enter your Keycloak JWT token"
+        });
+    };
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddFastEndpoints(options =>
@@ -29,6 +44,7 @@ builder.Services.AddFastEndpoints(options =>
     options.IncludeAbstractValidators = true;
 });
 
+builder.Services.AddKeycloakAuth(builder.Configuration);
 builder.Services.AddScoped<IWatchlistService, WatchlistService>();
 builder.Services.ConfigureRulesOptions(builder.Configuration);
 builder.Services.RegisterRepositories();
@@ -52,8 +68,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseFastEndpoints();
 app.UseSwaggerGen();
 app.MapHealthChecks("/health");

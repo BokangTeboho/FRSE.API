@@ -15,7 +15,6 @@ namespace FE.API.Endpoints.Alerts
         public override void Configure()
         {
             Post("/alerts/search");
-            AllowAnonymous();
         }
 
         public override async Task HandleAsync(SearchAlertsCommand req, CancellationToken ct)
