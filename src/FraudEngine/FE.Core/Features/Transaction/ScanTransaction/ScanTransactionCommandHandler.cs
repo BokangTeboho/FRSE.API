@@ -36,6 +36,16 @@ namespace FE.Core.Features.Transaction.ScanTransaction
     {
         public async Task<ScanTransactionResult> ExecuteAsync(ScanTransactionCommand command, CancellationToken ct)
         {
+            var (hasBeenScanned, existingResult) = await HasBeenScannedBefore(command, ct);
+
+            if (hasBeenScanned)
+            {
+                logger.LogInformation(
+                    "Transaction with ReferenceId={ReferenceId} has already been scanned. Returning existing result.",
+                    command.ReferenceId); // do not want to log user's sensitive information like account number
+                return existingResult!;
+            }
+
             var customer = await GetOrCreateCustomer(command, ct);
 
             var recentTransactions = await transactionRepository
@@ -62,9 +72,9 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 Id = Guid.NewGuid(),
                 AccountNumber = command.AccountNumber,
                 Amount = command.Amount,
-                Currency = command.Currency,
+                Currency = command.Currency.ToUpperInvariant(),
                 ReferenceId = command.ReferenceId,
-                Country = command.Country,
+                Country = command.Country.ToUpperInvariant(),
                 MerchantId = command.MerchantId,
                 MerchantName = command.MerchantName,
                 BeneficiaryAccountNumber = command.BeneficiaryAccountNumber,
@@ -106,20 +116,54 @@ namespace FE.Core.Features.Transaction.ScanTransaction
             return new ScanTransactionResult(command.ReferenceId, triggeredRules);
         }
 
+        private async Task<(bool, ScanTransactionResult?)> HasBeenScannedBefore(ScanTransactionCommand command, CancellationToken ct)
+        {
+            var existing = await transactionRepository
+                .GetByReferenceAndAccount(command.ReferenceId, command.AccountNumber, ct);
+
+            if (existing is not null)
+            {
+                var existingAlerts = await fraudAlertRepository
+                    .GetByTransactionId(existing.Id, ct);
+
+                return (true, new ScanTransactionResult(
+                    existing.ReferenceId,
+                    [.. existingAlerts.Select(a => new FraudRuleResult
+                    {
+                        IsTriggered = true,
+                        RuleName = a.RuleName,
+                        Severity = a.Severity,
+                        Description = a.Description
+                    })]));
+            }
+
+            return (false, null);
+        }
+
         private async Task<Customer> GetOrCreateCustomer(ScanTransactionCommand command, CancellationToken ct)
         {
             var customer = await customerRepository.GetByAccountNumber(command.AccountNumber, ct);
 
             if (customer is not null)
+            {
+                if (!customer.KnownCountries.Contains(command.Country.ToUpperInvariant()))
+                {
+                    customer.KnownCountries.Add(command.Country.ToUpperInvariant());
+                }
+
+                //customer.AverageTransactionAmount
+                customerRepository.UpdateCustomer(customer, ct);
+
                 return customer;
+            }
 
             customer = new Customer
             {
                 Id = Guid.NewGuid(),
                 AccountNumber = command.AccountNumber,
                 Name = command.CustomerName,
-                AverageTransactionAmount = 0,
-                KnownCountries = [],
+                AverageTransactionAmount = 0, // update here
+                KnownCountries = [command.Country.ToUpperInvariant()],
                 AccountCreatedAt = DateTimeOffset.UtcNow
             };
 

@@ -8,6 +8,13 @@ namespace FE.Infrastructure.Repositories
 {
     public class FraudAlertRepository(FraudEngineDbContext db) : IFraudAlertRepository
     {
+        public async Task<IReadOnlyList<FraudAlert>> GetByTransactionId(Guid id, CancellationToken ct)
+        {
+            return await db.FraudAlerts
+                .Where(a => a.TransactionId == id)
+                .ToListAsync(ct);
+        }
+
         public async Task Add(FraudAlert alert, CancellationToken ct)
         {
             await db.FraudAlerts.AddAsync(alert, ct);

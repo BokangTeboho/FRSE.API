@@ -18,5 +18,10 @@ namespace FE.Infrastructure.Repositories
                 .Where(c => c.AccountNumber == accountNumber)
                 .FirstOrDefaultAsync(ct);
         }
+
+        public void UpdateCustomer(Customer customer, CancellationToken ct)
+        {
+            db.Customers.Update(customer);
+        } 
     }
 }

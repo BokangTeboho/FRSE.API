@@ -6,5 +6,6 @@ namespace FE.Core.Interfaces
     {
         Task<Customer?> GetByAccountNumber(string accountNumber, CancellationToken ct);
         Task Add(Customer customer, CancellationToken ct);
+        void UpdateCustomer(Customer customer, CancellationToken ct);
     }
 }

@@ -23,5 +23,13 @@ namespace FE.Infrastructure.Repositories
                 .OrderBy(t => t.CreatedAt)
                 .ToListAsync(ct);
         }
+
+        public Task<Transaction?> GetByReferenceAndAccount(string referenceId, string accountNumber, CancellationToken ct)
+        {
+            return db.Transactions
+                .Where(t => t.ReferenceId == referenceId)
+                .Where(t => t.AccountNumber == accountNumber)
+                .FirstOrDefaultAsync(ct);
+        }
     }
 }

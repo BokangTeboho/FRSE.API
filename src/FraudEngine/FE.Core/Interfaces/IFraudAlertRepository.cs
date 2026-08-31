@@ -5,6 +5,7 @@ namespace FE.Core.Interfaces
 {
     public interface IFraudAlertRepository
     {
+        Task<IReadOnlyList<FraudAlert>> GetByTransactionId(Guid id, CancellationToken ct);
         Task Add(FraudAlert fraudAlert, CancellationToken ct);
 
         Task<(IReadOnlyList<FraudAlert> Items, int TotalCount)> Search(
