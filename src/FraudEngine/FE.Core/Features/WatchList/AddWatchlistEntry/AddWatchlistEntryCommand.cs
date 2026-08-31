@@ -19,7 +19,7 @@ namespace FE.Core.Features.WatchList.AddWatchlistEntry
         string Reason,
         int AlertCount,
         bool IsManualEntry,
-        string AddedByIdentifier,
+        string ModifiedByIdentifier,
         bool IsActive,
         DateTimeOffset CreatedAt);
 }

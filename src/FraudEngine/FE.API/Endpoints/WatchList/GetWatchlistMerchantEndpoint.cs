@@ -49,7 +49,7 @@ namespace FE.API.Endpoints.WatchList
                 entry.Reason,
                 entry.AlertCount,
                 entry.IsManualEntry,
-                entry.AddedByIdentifier,
+                entry.ModifiedByIdentifier,
                 entry.IsActive,
                 entry.CreatedAt), ct);
         }
