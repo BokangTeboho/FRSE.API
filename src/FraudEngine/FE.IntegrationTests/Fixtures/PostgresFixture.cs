@@ -38,6 +38,7 @@ public class PostgresFixture : IAsyncLifetime
         services.AddSingleton<IOptions<ThresholdRuleOptions>>(Options.Create(
             new ThresholdRuleOptions
             {
+                DefaultLimit = 10_000m,
                 Limits = new() { ["USD"] = 10_000m, ["ZAR"] = 150_000m }
             }));
         services.AddSingleton<IOptions<VelocityRuleOptions>>(Options.Create(
@@ -54,6 +55,7 @@ public class PostgresFixture : IAsyncLifetime
         services.AddSingleton<IOptions<StructuringRuleOptions>>(Options.Create(
             new StructuringRuleOptions
             {
+                DefaultThreshold = 10_000m,
                 Thresholds = new() { ["USD"] = 10_000m, ["ZAR"] = 25_000m },
                 ProximityPercentage = 0.1m
             }));

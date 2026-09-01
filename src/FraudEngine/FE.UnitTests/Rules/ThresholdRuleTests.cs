@@ -11,6 +11,7 @@ public class ThresholdRuleTests
     private readonly ThresholdRule _rule = new(Options.Create(
         new ThresholdRuleOptions
         {
+            DefaultLimit = 10_000m,
             Limits = new() { ["USD"] = 10_000m, ["ZAR"] = 150_000m }
         }));
 
@@ -88,6 +89,37 @@ public class ThresholdRuleTests
 
         Assert.True(result.IsTriggered);
         Assert.Equal(Severity.Medium, result.Severity);
+    }
+
+    [Fact]
+    public void UnknownCurrency_FallsBackToDefaultLimit()
+    {
+        var result = _rule.Evaluate(CreateTransaction(15_000m, "GBP"), CreateSnapshot());
+
+        Assert.True(result.IsTriggered);
+        Assert.Equal(Severity.Medium, result.Severity);
+    }
+
+    [Fact]
+    public void UnknownCurrency_BelowDefaultLimit_ReturnsClean()
+    {
+        var result = _rule.Evaluate(CreateTransaction(5_000m, "GBP"), CreateSnapshot());
+
+        Assert.False(result.IsTriggered);
+    }
+
+    [Fact]
+    public void NoDefaultLimit_UnknownCurrency_ReturnsClean()
+    {
+        var rule = new ThresholdRule(Options.Create(
+            new ThresholdRuleOptions
+            {
+                Limits = new() { ["USD"] = 10_000m }
+            }));
+
+        var result = rule.Evaluate(CreateTransaction(50_000m, "GBP"), CreateSnapshot());
+
+        Assert.False(result.IsTriggered);
     }
 
     [Fact]

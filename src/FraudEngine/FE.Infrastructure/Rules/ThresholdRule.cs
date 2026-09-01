@@ -9,6 +9,7 @@ namespace FE.Infrastructure.Rules
     public record ThresholdRuleOptions
     {
         public Dictionary<string, decimal> Limits { get; init; } = [];
+        public decimal DefaultLimit { get; init; }
     }
 
     public class ThresholdRule(IOptions<ThresholdRuleOptions> options) : IFraudRule
@@ -27,9 +28,10 @@ namespace FE.Infrastructure.Rules
         {
             var optionsValue = options.Value;
 
-            optionsValue.Limits.TryGetValue(transaction.Currency, out var limit);
+            if (!optionsValue.Limits.TryGetValue(transaction.Currency, out var limit))
+                limit = optionsValue.DefaultLimit;
 
-            if (transaction.Amount <= limit)
+            if (limit <= 0 || transaction.Amount <= limit)
                 return FraudRuleResult.Clean();
 
             var ratio = transaction.Amount / limit;

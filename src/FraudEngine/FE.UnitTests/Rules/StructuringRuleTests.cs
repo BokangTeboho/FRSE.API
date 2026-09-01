@@ -11,6 +11,7 @@ public class StructuringRuleTests
     private readonly StructuringRule _rule = new(Options.Create(
         new StructuringRuleOptions
         {
+            DefaultThreshold = 10_000m,
             Thresholds = new() { ["USD"] = 10_000m },
             ProximityPercentage = 0.1m
         }));
@@ -55,9 +56,32 @@ public class StructuringRuleTests
     }
 
     [Fact]
-    public void CurrencyNotInThresholds_ReturnsClean()
+    public void UnknownCurrency_FallsBackToDefaultThreshold()
     {
         var result = _rule.Evaluate(CreateTransaction(9500m, "EUR"), CreateSnapshot());
+
+        Assert.True(result.IsTriggered);
+        Assert.Equal(Severity.Low, result.Severity);
+    }
+
+    [Fact]
+    public void UnknownCurrency_BelowProximity_ReturnsClean()
+    {
+        var result = _rule.Evaluate(CreateTransaction(5000m, "EUR"), CreateSnapshot());
+        Assert.False(result.IsTriggered);
+    }
+
+    [Fact]
+    public void NoDefaultThreshold_UnknownCurrency_ReturnsClean()
+    {
+        var rule = new StructuringRule(Options.Create(
+            new StructuringRuleOptions
+            {
+                Thresholds = new() { ["USD"] = 10_000m },
+                ProximityPercentage = 0.1m
+            }));
+
+        var result = rule.Evaluate(CreateTransaction(9500m, "EUR"), CreateSnapshot());
         Assert.False(result.IsTriggered);
     }
 
