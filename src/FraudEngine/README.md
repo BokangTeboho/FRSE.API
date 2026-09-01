@@ -18,10 +18,9 @@ The solution follows Clean Architecture with three projects:
 
 ### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker](https://docs.docker.com/get-docker/)
 
-### 1. Start the infrastructure
+### 1. Start everything
 
 From the solution root (`src/FraudEngine/`):
 
@@ -29,32 +28,30 @@ From the solution root (`src/FraudEngine/`):
 docker compose up -d
 ```
 
-This starts:
+This builds and starts all services:
 
 | Service | Port | Credentials |
 |---|---|---|
+| **Fraud Engine API** | [http://localhost:5000](http://localhost:5000) | — |
 | **Keycloak** | [http://localhost:8080](http://localhost:8080) | admin / admin |
 | Keycloak Postgres | 5433 | keycloak / keycloak |
 | Fraud Engine Postgres | 5432 | postgres / Password123 |
 
-Keycloak auto-imports the `fraud-engine` realm with all clients, scopes, roles, and a test user.
+Keycloak auto-imports the `fraud-engine` realm with all clients, scopes, roles, and a test user. Database migrations are applied automatically on startup (disabled in production — use a controlled migration process instead).
 
-### 2. Apply database migrations
+### 2. Open Swagger
 
-```bash
-cd src/FraudEngine/FE.API
-dotnet ef database update --project ../FE.Infrastructure
-```
+Navigate to [http://localhost:5000/swagger](http://localhost:5000/swagger). Click **Authorize**, select the **KeycloakOAuth** option, and click **Authorize** to be redirected to Keycloak's login page. Log in with `admin` / `admin`.
 
-### 3. Run the API
+### Local development without Docker
+
+To run the API outside of Docker (e.g. for debugging), start the infrastructure first (`docker compose up -d keycloak keycloak-db fraud-engine-db`), then:
 
 ```bash
 dotnet run --project src/FraudEngine/FE.API
 ```
 
-### 4. Open Swagger
-
-Navigate to the Swagger UI (the exact URL is printed in the console output). Click **Authorize**, select the **KeycloakOAuth** option, and click **Authorize** to be redirected to Keycloak's login page. Log in with `admin` / `admin`.
+This requires the [.NET 10 SDK](https://dotnet.microsoft.com/download). Migrations are applied automatically on startup.
 
 ## API Endpoints
 
@@ -182,14 +179,26 @@ All rule parameters are configurable in `appsettings.json` under `FraudRules`:
 }
 ```
 
-Set `RequireHttpsMetadata` to `true` in production.
+`SwaggerClientId` enables the Swagger OAuth2 redirect flow in development. In production, `RequireHttpsMetadata` is `true` and the redirect flow is disabled — see [Authentication](#authentication).
 
 ## Authentication
 
-The API uses **Keycloak** for authentication via JWT Bearer tokens. Two auth methods are available:
+The API uses **Keycloak** for authentication via JWT Bearer tokens.
 
-- **Swagger UI** — OAuth2 Authorization Code flow with PKCE. Click Authorize in Swagger to be redirected to Keycloak's login page.
-- **Service-to-service** — Pass a Bearer token directly in the `Authorization` header. Obtain a token from Keycloak's token endpoint using client credentials or any other supported grant type.
+### Development
+
+Swagger exposes an **OAuth2 Authorization Code flow** with PKCE. Click **Authorize** in Swagger and you will be redirected to Keycloak's login page. You can also paste a token directly using the **Bearer** scheme.
+
+### Production
+
+The OAuth2 redirect flow is not available. Pass a Bearer token in the `Authorization` header. Obtain a token from Keycloak's token endpoint using client credentials or any other supported grant type.
+
+Override the placeholder values in `appsettings.Production.json` (or via environment variables) for your deployment:
+
+| Setting | Environment variable |
+|---|---|
+| Keycloak authority | `Keycloak__Authority` |
+| Connection string | `ConnectionStrings__FraudEngine` |
 
 ### Keycloak Realm Setup
 

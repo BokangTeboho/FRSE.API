@@ -31,20 +31,25 @@ builder.Services.SwaggerDocument(o =>
     {
         s.Title = "Fraud Engine API";
         s.Version = "v1";
-        s.AddAuth("KeycloakOAuth", new()
+
+        if (builder.Environment.IsDevelopment())
         {
-            Type = OpenApiSecuritySchemeType.OAuth2,
-            Description = "Login via Keycloak",
-            Flows = new OpenApiOAuthFlows
+            s.AddAuth("KeycloakOAuth", new()
             {
-                AuthorizationCode = new OpenApiOAuthFlow
+                Type = OpenApiSecuritySchemeType.OAuth2,
+                Description = "Login via Keycloak",
+                Flows = new OpenApiOAuthFlows
                 {
-                    AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
-                    TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
-                    Scopes = new Dictionary<string, string>()
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
+                        TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
+                        Scopes = new Dictionary<string, string>()
+                    }
                 }
-            }
-        });
+            });
+        }
+
         s.SchemaSettings.SchemaProcessors.Add(new EnumSchemaFilter());
 
         s.AddAuth("Bearer", new()
@@ -83,8 +88,9 @@ builder.Services.AddMemoryCache(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsProduction())
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<FraudEngineDbContext>();
     await db.Database.MigrateAsync();
 }
@@ -103,11 +109,14 @@ app.UseAuthorization();
 app.UseFastEndpoints(c => c.Serializer.Options.Converters.Add(new JsonStringEnumConverter()));
 app.UseSwaggerGen(uiConfig: s =>
 {
-    s.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
+    if (app.Environment.IsDevelopment())
     {
-        ClientId = swaggerClientId,
-        UsePkceWithAuthorizationCodeGrant = true
-    };
+        s.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
+        {
+            ClientId = swaggerClientId,
+            UsePkceWithAuthorizationCodeGrant = true
+        };
+    }
 });
 app.MapHealthChecks("/health");
 app.Run();
