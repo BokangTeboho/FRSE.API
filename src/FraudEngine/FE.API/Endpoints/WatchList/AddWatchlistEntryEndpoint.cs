@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using FastEndpoints;
 using FE.Core.Features.WatchList.AddWatchlistEntry;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FE.API.Endpoints.WatchList
 {
@@ -17,7 +16,6 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Post("/watchlist/entry");
-            AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         }
 
         public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)
