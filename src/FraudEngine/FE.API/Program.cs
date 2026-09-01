@@ -94,7 +94,7 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
 }
 
 app.UseHttpsRedirection();
@@ -109,5 +109,5 @@ app.UseSwaggerGen(uiConfig: s =>
         UsePkceWithAuthorizationCodeGrant = true
     };
 });
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 app.Run();
