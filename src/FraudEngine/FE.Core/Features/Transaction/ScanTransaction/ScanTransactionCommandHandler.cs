@@ -134,7 +134,6 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                 if (!customer.KnownCountries.Contains(command.Country.ToUpperInvariant()))
                 {
                     customer.KnownCountries.Add(command.Country.ToUpperInvariant());
-                    customerRepository.UpdateCustomer(customer);
                 }
 
                 return customer;
@@ -179,8 +178,6 @@ namespace FE.Core.Features.Transaction.ScanTransaction
                     / (channelAverage.TransactionCount + 1);
 
             channelAverage.TransactionCount++;
-
-            customerRepository.UpdateCustomerAverage(channelAverage);
 
             return channelAverage;
         }

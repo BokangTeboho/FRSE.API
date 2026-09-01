@@ -25,16 +25,6 @@ namespace FE.Infrastructure.Repositories
                 .FirstOrDefaultAsync(ct);
         }
 
-        public void UpdateCustomer(Customer customer)
-        {
-            db.Customers.Update(customer);
-        }
-
-        public void UpdateCustomerAverage(CustomerChannelAverage customerChannelAverage)
-        {
-            db.CustomerChannelAverages.Update(customerChannelAverage);
-        }
-
         public Task<CustomerChannelAverage?> GetByCustomerAndChannel(Guid customerId, PaymentChannel channel, CancellationToken ct)
         {
             return db.CustomerChannelAverages
