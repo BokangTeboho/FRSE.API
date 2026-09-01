@@ -26,6 +26,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME_URL: "http://localhost:8080"
     volumes:
       - ./keycloak:/opt/keycloak/data/import
     ports:
@@ -49,6 +50,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  fraud-engine-api:
+    build:
+      context: .
+      dockerfile: FE.API/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      ConnectionStrings__FraudEngine: "Host=fraud-engine-db;Database=fraud_engine;Username=postgres;Password=Password123"
+      Keycloak__Authority: "http://keycloak:8080/realms/fraud-engine"
+      Keycloak__RequireHttpsMetadata: "false"
+    depends_on:
+      fraud-engine-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
 
 volumes:
   keycloak-db-data:
