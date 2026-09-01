@@ -16,11 +16,13 @@ namespace FE.Core.Features.WatchList.DeactivateWatchlistEntry
             if (entry is null)
                 return null;
 
+            entry.ModifiedByIdentifier = command.ModifiedByIdentifier;
             await unitOfWork.SaveChangesAsync(ct);
 
             return new DeactivateWatchlistEntryResult(
                 entry.Id,
                 entry.IsActive,
+                entry.ModifiedByIdentifier,
                 DateTimeOffset.UtcNow);
         }
     }
