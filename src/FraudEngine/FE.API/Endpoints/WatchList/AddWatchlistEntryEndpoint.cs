@@ -20,7 +20,7 @@ namespace FE.API.Endpoints.WatchList
 
         public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)
         {
-            req.ModifiedByIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            req.ModifiedByIdentifier = User.FindFirstValue("sub")
                 ?? throw new InvalidOperationException("User identifier claim is missing.");
 
             var result = await req.ExecuteAsync(ct);
