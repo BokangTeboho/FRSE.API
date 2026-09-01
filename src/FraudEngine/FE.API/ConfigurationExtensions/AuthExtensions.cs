@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,6 +16,7 @@ namespace FE.API.ConfigurationExtensions
                     options.Authority = keycloakSection["Authority"];
                     options.Audience = keycloakSection["Audience"];
                     options.RequireHttpsMetadata = keycloakSection.GetValue<bool>("RequireHttpsMetadata");
+                    options.MapInboundClaims = false;
 
                     var metadataAddress = keycloakSection["MetadataAddress"];
                     if (!string.IsNullOrEmpty(metadataAddress))
@@ -26,7 +28,9 @@ namespace FE.API.ConfigurationExtensions
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidIssuer = keycloakSection["Authority"],
-                        ValidAudience = keycloakSection["Audience"]
+                        ValidAudience = keycloakSection["Audience"],
+                        NameClaimType = "preferred_username",
+                        RoleClaimType = "roles"
                     };
                 });
 
