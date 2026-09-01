@@ -2,6 +2,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using FE.API.ConfigurationExtensions;
 using FE.API.Middleware;
+using FE.API.Swagger;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
 using FE.Infrastructure.Resilience;
@@ -46,6 +47,8 @@ builder.Services.SwaggerDocument(o =>
                 }
             }
         });
+        s.SchemaSettings.SchemaProcessors.Add(new EnumSchemaFilter());
+
         s.AddAuth("Bearer", new()
         {
             Type = OpenApiSecuritySchemeType.Http,
