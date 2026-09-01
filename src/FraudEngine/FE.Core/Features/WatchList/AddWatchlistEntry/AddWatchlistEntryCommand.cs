@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using FastEndpoints;
 using FE.Core.Enums;
 
@@ -9,6 +10,9 @@ namespace FE.Core.Features.WatchList.AddWatchlistEntry
         public required string EntityIdentifier { get; init; }
         public required Severity RiskLevel { get; init; }
         public required string Reason { get; init; }
+
+        [JsonIgnore]
+        public string ModifiedByIdentifier { get; set; } = string.Empty;
     }
 
     public record AddWatchlistEntryResult(

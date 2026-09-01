@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FastEndpoints;
 using FE.Core.Features.WatchList.DeactivateWatchlistEntry;
 
@@ -20,6 +21,9 @@ namespace FE.API.Endpoints.WatchList
 
         public override async Task HandleAsync(DeactivateWatchlistEntryCommand req, CancellationToken ct)
         {
+            req.ModifiedByIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new InvalidOperationException("User identifier claim is missing.");
+
             var result = await req.ExecuteAsync(ct);
 
             if (result is null)
