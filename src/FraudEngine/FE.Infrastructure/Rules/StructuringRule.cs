@@ -9,6 +9,7 @@ namespace FE.Infrastructure.Rules
     public class StructuringRuleOptions
     {
         public Dictionary<string, decimal> Thresholds { get; init; } = [];
+        public decimal DefaultThreshold { get; init; }
         public decimal ProximityPercentage { get; init; }
     }
 
@@ -28,6 +29,9 @@ namespace FE.Infrastructure.Rules
             var optionsValue = options.Value;
 
             if (!optionsValue.Thresholds.TryGetValue(transaction.Currency, out var threshold))
+                threshold = optionsValue.DefaultThreshold;
+
+            if (threshold <= 0)
                 return FraudRuleResult.Clean();
 
             var floor = threshold * (1 - optionsValue.ProximityPercentage);
