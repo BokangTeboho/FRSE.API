@@ -31,7 +31,7 @@ builder.Services.SwaggerDocument(o =>
     {
         s.Title = "Fraud Engine API";
         s.Version = "v1";
-        s.AddAuth("KeycloakOAuth", new()
+        s.AddAuth("Bearer", new()
         {
             Type = OpenApiSecuritySchemeType.OAuth2,
             Description = "Login via Keycloak",
@@ -46,14 +46,6 @@ builder.Services.SwaggerDocument(o =>
             }
         });
         s.SchemaSettings.SchemaProcessors.Add(new EnumSchemaFilter());
-
-        s.AddAuth("Bearer", new()
-        {
-            Type = OpenApiSecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            Description = "Paste a valid JWT token directly"
-        });
     };
 });
 builder.Services.AddProblemDetails();
@@ -94,7 +86,7 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi().AllowAnonymous();
+    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
@@ -109,5 +101,5 @@ app.UseSwaggerGen(uiConfig: s =>
         UsePkceWithAuthorizationCodeGrant = true
     };
 });
-app.MapHealthChecks("/health").AllowAnonymous();
+app.MapHealthChecks("/health");
 app.Run();
