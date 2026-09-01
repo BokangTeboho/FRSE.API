@@ -39,20 +39,15 @@ This starts:
 
 Keycloak auto-imports the `fraud-engine` realm with all clients, scopes, roles, and a test user.
 
-### 2. Apply database migrations
-
-```bash
-cd src/FraudEngine/FE.API
-dotnet ef database update --project ../FE.Infrastructure
-```
-
-### 3. Run the API
+### 2. Run the API
 
 ```bash
 dotnet run --project src/FraudEngine/FE.API
 ```
 
-### 4. Open Swagger
+Pending database migrations are applied automatically on startup — no manual `dotnet ef database update` step is needed.
+
+### 3. Open Swagger
 
 Navigate to the Swagger UI (the exact URL is printed in the console output). Click **Authorize**, select the **KeycloakOAuth** option, and click **Authorize** to be redirected to Keycloak's login page. Log in with `admin` / `admin`.
 
@@ -182,14 +177,26 @@ All rule parameters are configurable in `appsettings.json` under `FraudRules`:
 }
 ```
 
-Set `RequireHttpsMetadata` to `true` in production.
+`SwaggerClientId` enables the Swagger OAuth2 redirect flow in development. In production, `RequireHttpsMetadata` is `true` and the redirect flow is disabled — see [Authentication](#authentication).
 
 ## Authentication
 
-The API uses **Keycloak** for authentication via JWT Bearer tokens. Two auth methods are available:
+The API uses **Keycloak** for authentication via JWT Bearer tokens.
 
-- **Swagger UI** — OAuth2 Authorization Code flow with PKCE. Click Authorize in Swagger to be redirected to Keycloak's login page.
-- **Service-to-service** — Pass a Bearer token directly in the `Authorization` header. Obtain a token from Keycloak's token endpoint using client credentials or any other supported grant type.
+### Development
+
+Swagger exposes an **OAuth2 Authorization Code flow** with PKCE. Click **Authorize** in Swagger and you will be redirected to Keycloak's login page. You can also paste a token directly using the **Bearer** scheme.
+
+### Production
+
+The OAuth2 redirect flow is not available. Pass a Bearer token in the `Authorization` header. Obtain a token from Keycloak's token endpoint using client credentials or any other supported grant type.
+
+Override the placeholder values in `appsettings.Production.json` (or via environment variables) for your deployment:
+
+| Setting | Environment variable |
+|---|---|
+| Keycloak authority | `Keycloak__Authority` |
+| Connection string | `ConnectionStrings__FraudEngine` |
 
 ### Keycloak Realm Setup
 
