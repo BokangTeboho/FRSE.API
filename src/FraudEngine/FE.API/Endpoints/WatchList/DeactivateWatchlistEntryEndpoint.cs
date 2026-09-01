@@ -1,47 +1,51 @@
 using System.Security.Claims;
 using FastEndpoints;
+using FE.API.Services;
 using FE.Core.Features.WatchList.DeactivateWatchlistEntry;
 
-namespace FE.API.Endpoints.WatchList
+namespace FE.API.Endpoints.WatchList;
+
+public class DeactivateWatchlistEntryEndpoint(
+    ILogger<DeactivateWatchlistEntryEndpoint> logger,
+    KeycloakUserInfoService keycloakUserInfo)
+    : Endpoint<DeactivateWatchlistEntryCommand, DeactivateWatchlistEntryResult>
 {
-    public class DeactivateWatchlistEntryEndpoint
-        : Endpoint<DeactivateWatchlistEntryCommand, DeactivateWatchlistEntryResult>
+    public override void Configure()
     {
-        private readonly ILogger<DeactivateWatchlistEntryEndpoint> _logger;
+        Patch("/watchlist/{Id}/deactivate");
+    }
 
-        public DeactivateWatchlistEntryEndpoint(ILogger<DeactivateWatchlistEntryEndpoint> logger)
+    public override async Task HandleAsync(DeactivateWatchlistEntryCommand req, CancellationToken ct)
+    {
+        var userId = User.FindFirstValue("sub") ?? await GetUserSubFromKeycloakAsync(ct);
+
+        if (userId is null)
         {
-            _logger = logger;
+            HttpContext.Response.StatusCode = 401;
+            return;
         }
 
-        public override void Configure()
+        req.ModifiedByIdentifier = userId;
+
+        var result = await req.ExecuteAsync(ct);
+
+        if (result is null)
         {
-            Patch("/watchlist/{Id}/deactivate");
+            await Send.NotFoundAsync(ct);
+            return;
         }
 
-        public override async Task HandleAsync(DeactivateWatchlistEntryCommand req, CancellationToken ct)
-        {
-            var userId = User.FindFirstValue("sub");
-            if (userId is null)
-            {
-                HttpContext.Response.StatusCode = 401;
-                return;
-            }
+        logger.LogInformation("Watchlist entry deactivated: Id={Id}", result.Id);
 
-            req.ModifiedByIdentifier = userId;
+        await Send.OkAsync(result, ct);
+    }
 
-            var result = await req.ExecuteAsync(ct);
+    private async Task<string?> GetUserSubFromKeycloakAsync(CancellationToken ct)
+    {
+        var authHeader = HttpContext.Request.Headers.Authorization.ToString();
+        if (!authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            return null;
 
-            if (result is null)
-            {
-                await Send.NotFoundAsync(ct);
-                return;
-            }
-
-            _logger.LogInformation(
-                "Watchlist entry deactivated: Id={Id}", result.Id);
-
-            await Send.OkAsync(result, ct);
-        }
+        return await keycloakUserInfo.GetUserSubAsync(authHeader["Bearer ".Length..], ct);
     }
 }

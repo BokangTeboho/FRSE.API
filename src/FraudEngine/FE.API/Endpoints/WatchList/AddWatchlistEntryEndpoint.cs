@@ -1,45 +1,47 @@
 using System.Security.Claims;
 using FastEndpoints;
+using FE.API.Services;
 using FE.Core.Features.WatchList.AddWatchlistEntry;
 
-namespace FE.API.Endpoints.WatchList
+namespace FE.API.Endpoints.WatchList;
+
+public class AddWatchlistEntryEndpoint(
+    ILogger<AddWatchlistEntryEndpoint> logger,
+    KeycloakUserInfoService keycloakUserInfo)
+    : Endpoint<AddWatchlistEntryCommand, AddWatchlistEntryResult>
 {
-    public class AddWatchlistEntryEndpoint : Endpoint<AddWatchlistEntryCommand, AddWatchlistEntryResult>
+    public override void Configure()
     {
-        private readonly ILogger<AddWatchlistEntryEndpoint> _logger;
+        Post("/watchlist/entry");
+    }
 
-        public AddWatchlistEntryEndpoint(ILogger<AddWatchlistEntryEndpoint> logger)
+    public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)
+    {
+        var userId = User.FindFirstValue("sub") ?? await GetUserSubFromKeycloakAsync(ct);
+
+        if (userId is null)
         {
-            _logger = logger;
+            HttpContext.Response.StatusCode = 401;
+            return;
         }
 
-        public override void Configure()
-        {
-            Post("/watchlist/entry");
-        }
+        req.ModifiedByIdentifier = userId;
 
-        public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)
-        {
-            var userId = User.FindFirstValue("sub");
-            
-            if (userId is null)
-            {
-                _logger.LogInformation($"{User?.Identity?.Name} is here");
-                _logger.LogInformation($"{String.Join(", ", User?.Claims.Select(x => x.Value))} is here");
-                _logger.LogWarning("Unauthorized attempt to add watchlist entry.");
-                HttpContext.Response.StatusCode = 401;
-                return;
-            }
+        var result = await req.ExecuteAsync(ct);
 
-            req.ModifiedByIdentifier = userId;
+        logger.LogInformation(
+            "Watchlist entry added: EntityType={EntityType}, Identifier={Identifier}",
+            result.EntityType, result.EntityIdentifier);
 
-            var result = await req.ExecuteAsync(ct);
+        await Send.OkAsync(result, ct);
+    }
 
-            _logger.LogInformation(
-                "Watchlist entry added: EntityType={EntityType}, Identifier={Identifier}",
-                result.EntityType, result.EntityIdentifier);
+    private async Task<string?> GetUserSubFromKeycloakAsync(CancellationToken ct)
+    {
+        var authHeader = HttpContext.Request.Headers.Authorization.ToString();
+        if (!authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            return null;
 
-            await Send.OkAsync(result, ct);
-        }
+        return await keycloakUserInfo.GetUserSubAsync(authHeader["Bearer ".Length..], ct);
     }
 }
