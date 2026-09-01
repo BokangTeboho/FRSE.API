@@ -88,8 +88,9 @@ builder.Services.AddMemoryCache(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsProduction())
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<FraudEngineDbContext>();
     await db.Database.MigrateAsync();
 }

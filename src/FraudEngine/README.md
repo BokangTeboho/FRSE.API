@@ -37,7 +37,7 @@ This builds and starts all services:
 | Keycloak Postgres | 5433 | keycloak / keycloak |
 | Fraud Engine Postgres | 5432 | postgres / Password123 |
 
-Keycloak auto-imports the `fraud-engine` realm with all clients, scopes, roles, and a test user. Database migrations are applied automatically on API startup.
+Keycloak auto-imports the `fraud-engine` realm with all clients, scopes, roles, and a test user. Database migrations are applied automatically on startup (disabled in production — use a controlled migration process instead).
 
 ### 2. Open Swagger
 
