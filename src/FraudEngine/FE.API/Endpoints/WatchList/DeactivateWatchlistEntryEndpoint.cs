@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using FastEndpoints;
 using FE.Core.Features.WatchList.DeactivateWatchlistEntry;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FE.API.Endpoints.WatchList
 {
@@ -18,13 +17,18 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Patch("/watchlist/{Id}/deactivate");
-            AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         }
 
         public override async Task HandleAsync(DeactivateWatchlistEntryCommand req, CancellationToken ct)
         {
-            req.ModifiedByIdentifier = User.FindFirstValue("sub")
-                ?? throw new InvalidOperationException("User identifier claim is missing.");
+            var userId = User.FindFirstValue("sub");
+            if (userId is null)
+            {
+                HttpContext.Response.StatusCode = 401;
+                return;
+            }
+
+            req.ModifiedByIdentifier = userId;
 
             var result = await req.ExecuteAsync(ct);
 

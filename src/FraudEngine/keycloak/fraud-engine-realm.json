@@ -62,6 +62,7 @@
       "protocol": "openid-connect",
       "attributes": {},
       "defaultClientScopes": [
+        "basic",
         "web-origins",
         "acr",
         "profile",
@@ -95,6 +96,7 @@
         "pkce.code.challenge.method": "S256"
       },
       "defaultClientScopes": [
+        "basic",
         "web-origins",
         "acr",
         "profile",

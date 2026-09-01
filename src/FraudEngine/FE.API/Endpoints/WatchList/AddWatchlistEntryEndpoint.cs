@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using FastEndpoints;
 using FE.Core.Features.WatchList.AddWatchlistEntry;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FE.API.Endpoints.WatchList
 {
@@ -17,13 +16,22 @@ namespace FE.API.Endpoints.WatchList
         public override void Configure()
         {
             Post("/watchlist/entry");
-            AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         }
 
         public override async Task HandleAsync(AddWatchlistEntryCommand req, CancellationToken ct)
         {
-            req.ModifiedByIdentifier = User.FindFirstValue("sub")
-                ?? throw new InvalidOperationException("User identifier claim is missing.");
+            var userId = User.FindFirstValue("sub");
+            
+            if (userId is null)
+            {
+                _logger.LogInformation($"{User?.Identity?.Name} is here");
+                _logger.LogInformation($"{String.Join(", ", User?.Claims.Select(x => x.Value))} is here");
+                _logger.LogWarning("Unauthorized attempt to add watchlist entry.");
+                HttpContext.Response.StatusCode = 401;
+                return;
+            }
+
+            req.ModifiedByIdentifier = userId;
 
             var result = await req.ExecuteAsync(ct);
 

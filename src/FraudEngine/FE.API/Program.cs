@@ -32,24 +32,20 @@ builder.Services.SwaggerDocument(o =>
         s.Title = "Fraud Engine API";
         s.Version = "v1";
 
-        if (builder.Environment.IsDevelopment())
+        s.AddAuth("KeycloakOAuth", new()
         {
-            s.AddAuth("Bearer", new()
+            Type = OpenApiSecuritySchemeType.OAuth2,
+            Description = "Login via Keycloak",
+            Flows = new OpenApiOAuthFlows
             {
-                Type = OpenApiSecuritySchemeType.OAuth2,
-                Description = "Login via Keycloak",
-                Flows = new OpenApiOAuthFlows
+                AuthorizationCode = new OpenApiOAuthFlow
                 {
-                    AuthorizationCode = new OpenApiOAuthFlow
-                    {
-                        AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
-                        TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
-                        Scopes = new Dictionary<string, string>()
-                    }
+                    AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
+                    TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
+                    Scopes = new Dictionary<string, string>()
                 }
-            });
-        }
-
+            }
+        });
         s.SchemaSettings.SchemaProcessors.Add(new EnumSchemaFilter());
     };
 });
@@ -101,14 +97,11 @@ app.UseAuthorization();
 app.UseFastEndpoints(c => c.Serializer.Options.Converters.Add(new JsonStringEnumConverter()));
 app.UseSwaggerGen(uiConfig: s =>
 {
-    if (app.Environment.IsDevelopment())
+    s.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
     {
-        s.OAuth2Client = new NSwag.AspNetCore.OAuth2ClientSettings
-        {
-            ClientId = swaggerClientId,
-            UsePkceWithAuthorizationCodeGrant = true
-        };
-    }
+        ClientId = swaggerClientId,
+        UsePkceWithAuthorizationCodeGrant = true
+    };
 });
 app.MapHealthChecks("/health");
 app.Run();
