@@ -5,8 +5,10 @@ using FE.API.Middleware;
 using FE.API.Swagger;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
+using FE.Infrastructure.Context;
 using FE.Infrastructure.Resilience;
 using FE.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using NSwag;
 using Serilog;
 using System.Text.Json.Serialization;
@@ -39,11 +41,7 @@ builder.Services.SwaggerDocument(o =>
                 {
                     AuthorizationUrl = $"{keycloakAuthority}/protocol/openid-connect/auth",
                     TokenUrl = $"{keycloakAuthority}/protocol/openid-connect/token",
-                    Scopes = new Dictionary<string, string>
-                    {
-                        { "openid", "OpenID" },
-                        { "profile", "Profile" }
-                    }
+                    Scopes = new Dictionary<string, string>()
                 }
             }
         });
@@ -84,6 +82,13 @@ builder.Services.AddMemoryCache(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FraudEngineDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 

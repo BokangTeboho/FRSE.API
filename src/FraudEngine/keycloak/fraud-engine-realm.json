@@ -84,10 +84,6 @@
         "http://localhost:*",
         "https://localhost:*"
       ],
-      "postLogoutRedirectUris": [
-        "http://localhost:*",
-        "https://localhost:*"
-      ],
       "webOrigins": [
         "http://localhost:5000",
         "http://localhost:5001",

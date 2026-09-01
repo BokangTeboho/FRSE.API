@@ -16,6 +16,10 @@ namespace FE.API.ConfigurationExtensions
                     options.Audience = keycloakSection["Audience"];
                     options.RequireHttpsMetadata = keycloakSection.GetValue<bool>("RequireHttpsMetadata");
 
+                    var metadataAddress = keycloakSection["MetadataAddress"];
+                    if (!string.IsNullOrEmpty(metadataAddress))
+                        options.MetadataAddress = metadataAddress;
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,

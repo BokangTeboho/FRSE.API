@@ -59,7 +59,8 @@ services:
       - "5000:8080"
     environment:
       ConnectionStrings__FraudEngine: "Host=fraud-engine-db;Database=fraud_engine;Username=postgres;Password=Password123"
-      Keycloak__Authority: "http://keycloak:8080/realms/fraud-engine"
+      Keycloak__Authority: "http://localhost:8080/realms/fraud-engine"
+      Keycloak__MetadataAddress: "http://keycloak:8080/realms/fraud-engine/.well-known/openid-configuration"
       Keycloak__RequireHttpsMetadata: "false"
     depends_on:
       fraud-engine-db:
