@@ -2,6 +2,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using FE.API.ConfigurationExtensions;
 using FE.API.Middleware;
+using FE.API.Services;
 using FE.API.Swagger;
 using FE.Core.Features.Transaction.ScanTransaction;
 using FE.Core.Interfaces;
@@ -31,7 +32,8 @@ builder.Services.SwaggerDocument(o =>
     {
         s.Title = "Fraud Engine API";
         s.Version = "v1";
-        s.AddAuth("Bearer", new()
+
+        s.AddAuth("KeycloakOAuth", new()
         {
             Type = OpenApiSecuritySchemeType.OAuth2,
             Description = "Login via Keycloak",
@@ -60,6 +62,7 @@ builder.Services.AddFastEndpoints(options =>
 });
 
 builder.Services.AddKeycloakAuth(builder.Configuration);
+builder.Services.AddHttpClient<KeycloakUserInfoService>();
 builder.Services.AddScoped<IWatchlistService, WatchlistService>();
 builder.Services.ConfigureRulesOptions(builder.Configuration);
 builder.Services.RegisterRepositories();
